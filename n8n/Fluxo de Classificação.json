@@ -1,0 +1,617 @@
+{
+  "name": "Fluxo de Classificação",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "tarefas",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "quadrante",
+              "condition": "eq",
+              "keyValue": "pendente"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        528,
+        0
+      ],
+      "id": "a98a3f8d-7394-48d4-8e96-3d47b2f7496c",
+      "name": "Obtém lista de tarefas",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        0
+      ],
+      "id": "feffa04f-b78c-4c81-bfdc-9b3b0745f4a3",
+      "name": "Temporizador"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é o Symphony AI, o mestre da Matriz de Eisenhower. \n\nSUA MISSÃO:\n1. Receber uma tarefa.\n2. Analisar o impacto (Importância) e o prazo (Urgência) dela.\n3. Classificar e salvar a tarefa usando EXATAMENTE UMA das ferramentas de quadrante (Q1, Q2, Q3 ou Q4).\n\nCRITÉRIOS DE DECISÃO:\n- Q1 (Fazer): Crises e prazos.\n- Q2 (Agendar): Desenvolvimento e prevenção.\n- Q3 (Delegar): Interrupções que exigem pressa mas agregam pouco valor.\n- Q4 (Eliminar): Atividades inúteis ou distrações.\n\nFLUXO OBRIGATÓRIO:\n1. Use primeiro a ferramenta \"Anotar tarefa\" para criar o registro inicial.\n2. Em seguida, use a ferramenta de quadrante correspondente (Q1, Q2, Q3 ou Q4) para classificar.\n3. Responda: \"✅ [TITULO] anotada e classificada no [QUADRANTE].\"\n\nResponda de forma direta e técnica. Não utilize raciocínio interno (thinking). Vá direto para a chamada da ferramenta (tool call) necessária.\n\nTítulo da tarefa:  {{ $json.titulo }}\nDescrição da tarefa: {{ $json.descricao }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "bb88baca-a85f-42b0-8ae3-282ae96ea2b7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q1"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        448,
+        416
+      ],
+      "id": "bc7f5262-36fa-416e-808e-39d67eb0729c",
+      "name": "Q1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Seta o quadrante",
+        "height": 224,
+        "width": 528,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        416,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "4d808a23-4952-40a5-97ba-328f57dd3a28",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q2"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        576,
+        416
+      ],
+      "id": "66e0934e-8f9c-477e-89ea-0bb93a425e4a",
+      "name": "Q2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q3"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        704,
+        416
+      ],
+      "id": "8a00d151-dc6a-480f-8cf8-2c2c44acdda6",
+      "name": "Q3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q4"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        832,
+        416
+      ],
+      "id": "bb294245-6c5a-4368-a882-c539c00127b2",
+      "name": "Q4",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "079b3b47-7424-40c4-ac68-f5602c7ddccb",
+      "name": "DeepSeek Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        880,
+        128
+      ],
+      "credentials": {
+        "deepSeekApi": {
+          "id": "g1sCJbLdajdespe7",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Etiquetas extras",
+        "height": 224,
+        "width": 304,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1552,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "2ccdab81-2fb0-4b6f-b9d5-f84e92b8a4cc",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Etiquetas de período",
+        "height": 224,
+        "width": 448,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        992,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "f6e5f518-dd35-49af-89df-4605b1644d22",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q4"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        416
+      ],
+      "id": "0988d335-2588-4e59-8375-06d095bf373e",
+      "name": "Manhã",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q4"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        416
+      ],
+      "id": "cb5f465d-15dd-4346-a8bb-820b232791c0",
+      "name": "Tarde",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q4"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        416
+      ],
+      "id": "fe4c4aed-38fa-4bd3-9ac5-495360aa0ade",
+      "name": "Noite",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q4"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        416
+      ],
+      "id": "4a3d8001-5987-4ca6-8981-2733c948c35f",
+      "name": "Alta Relevância (80/20)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "tarefas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quadrante",
+              "fieldValue": "Q4"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        416
+      ],
+      "id": "182ee75e-3f34-4b53-8df8-b3fc167fe8e9",
+      "name": "Fazer Agora",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Temporizador": {
+      "main": [
+        [
+          {
+            "node": "Obtém lista de tarefas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtém lista de tarefas": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Q1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Q2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Q3": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Q4": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manhã": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tarde": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Noite": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alta Relevância (80/20)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fazer Agora": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0ba15e4b-f743-4474-9987-c2c883cfc80f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f2176064a2de76eb398145db283b10c935453c5845aa150217d8feaba6ceb3e"
+  },
+  "id": "csw969RXdSs0zYip",
+  "tags": []
+}

@@ -1,0 +1,215 @@
+{
+  "name": "Anotador de Tarefas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "symphony-ai",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        48
+      ],
+      "id": "e3327a14-a431-4970-bd4d-941143d8341b",
+      "name": "Webhook",
+      "webhookId": "c03a3080-38fa-4151-8219-9586514d67a1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Acessa o objeto Info onde estão os dados que você mapeou\nconst info = $json.body?.data?.Info;\nconst data = $json.body?.data;\n\nreturn [\n  {\n    json: {\n      telefone: info?.Chat ? info.Chat.split('@')[0] : \"Não encontrado\",\n      nome: info?.PushName || \"Não informado\",\n      foto: data?.profilePicUrl || \"Sem foto\"\n    }\n  }\n];"
+      },
+      "id": "c703a50a-c77e-44e3-acd6-e1fe6aee11c4",
+      "name": "Separa informações",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "tarefas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "titulo",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "descricao",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        920,
+        272
+      ],
+      "id": "cc72df22-a7dd-46f8-a24a-d353135440e2",
+      "name": "Anotar tarefa",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XKGMsLK7OyKRHxi2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.data.Message.extendedTextMessage.text }}",
+        "options": {
+          "systemMessage": "=Você é um integrador de dados puramente funcional. Sua função é transformar mensagens de WhatsApp em entradas na tabela \"tarefas\".\n\nDIRETRIZES DE EXECUÇÃO:\n1. Extraia o assunto principal para o campo \"titulo\" e o texto completo para o campo \"descricao\".\n2. Acione obrigatoriamente a ferramenta \"Anotar tarefa\" para cada nova solicitação.\n3. No campo \"descricao\", você DEVE anexar os dados do remetente abaixo ao final do texto.\n\nDADOS DO REMETENTE:\n- Nome: {{ $json.nome }}\n- Telefone: {{ $json.telefone }}\n\nRESPOSTA AO USUÁRIO:\n- Não responda nada antes de usar a ferramenta.\n- Após o uso bem-sucedido da ferramenta, responda apenas: \"✅ Tarefa anotada: [TITULO]\""
+        }
+      },
+      "id": "c5ae2cff-0408-48a1-94ac-5f0986566f45",
+      "name": "Anotador de tarefa",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        784,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c3590d23-d736-40ff-9041-d947bcbf03ae",
+      "name": "DeepSeek Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        768,
+        272
+      ],
+      "credentials": {
+        "deepSeekApi": {
+          "id": "g1sCJbLdajdespe7",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://agizievolutionapi.agenciaizi.com.br/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "6b051685-8ff9-484a-9929-cb06aef0a5c5"
+            },
+            {
+              "name": "instance",
+              "value": "assistente-adm"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"instance\": \"assistente-adm\",\n  \"number\": \"{{ $(\"Webhook\").item.json.body?.key?.remoteJid ?? \"5565981181818@s.whatsapp.net\" }}\",\n  \"text\": {{ JSON.stringify($json.output) }},\n  \"delay\": 1200\n}",
+        "options": {}
+      },
+      "id": "ab76a6db-3d86-4c9c-a65c-d50dce3f2aec",
+      "name": "Responde no WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        48
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Separa informações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separa informações": {
+      "main": [
+        [
+          {
+            "node": "Anotador de tarefa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anotar tarefa": {
+      "ai_tool": [
+        [
+          {
+            "node": "Anotador de tarefa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anotador de tarefa": {
+      "main": [
+        [
+          {
+            "node": "Responde no WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Anotador de tarefa",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responde no WhatsApp": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 30,
+    "availableInMCP": false
+  },
+  "versionId": "daa500ca-7e57-464d-9d3b-c1e45ee65fbc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f2176064a2de76eb398145db283b10c935453c5845aa150217d8feaba6ceb3e"
+  },
+  "id": "sDDFLnWhEnYZvIQ2",
+  "tags": []
+}
