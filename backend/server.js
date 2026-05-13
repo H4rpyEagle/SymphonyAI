@@ -207,6 +207,22 @@ app.get("/health", async (req, res) => {
   }
 });
 
+/** GET /historico — listar as decisões do agente */
+app.get("/historico", async (req, res) => {
+  try {
+    if (!process.env.DATABASE_URL?.trim()) {
+      return res.status(503).json({ error: "DATABASE_URL não definido." });
+    }
+    const r = await pool.query(
+      `SELECT id, criado_em, output FROM historico_agente ORDER BY criado_em DESC LIMIT 50`
+    );
+    return res.json({ historico: r.rows });
+  } catch (err) {
+    console.error("[GET /historico]", err.message);
+    return res.status(500).json({ error: err.message || "Erro no servidor" });
+  }
+});
+
 /** GET /tarefas */
 app.get("/tarefas", async (req, res) => {
   try {
@@ -533,6 +549,13 @@ app.post("/webhook", async (req, res) => {
 });
 
 const PORT = Number(process.env.PORT) || 3001;
-app.listen(PORT, () => {
-  console.log(`Symphony AI API em http://localhost:${PORT}`);
-});
+
+// Se não estiver rodando dentro da Vercel, inicia o servidor localmente na porta 3001
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Symphony AI API em http://localhost:${PORT}`);
+  });
+}
+
+// Exporta o app Express para a Vercel Serverless Functions
+export default app;
